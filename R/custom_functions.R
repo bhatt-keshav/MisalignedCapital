@@ -45,25 +45,13 @@ calculate_ar <- function(data, model) {
     )
 }
 
-# Plots the abnormal returns
-plot_ar_results <- function(data, event_date, title = "Abnormal Risk Returns") {
-  data %>%
-    ggplot(aes(x = Date, y = AR_risk)) +
-    geom_line(color = "steelblue", linewidth = 0.8) +
-    # Vertical line for the event date
-    geom_vline(
-      xintercept = as.numeric(event_date),
-      linetype = 'dashed',
-      color = "red",
-      linewidth = 1
-    ) +
-    # Horizontal line at zero
-    geom_hline(yintercept = 0, linetype = "solid", color = "black") +
-    labs(
-      title = title,
-      subtitle = paste("Event Date:", event_date),
-      x = "Date",
-      y = "Abnormal Return (AR)"
-    ) +
-    theme_minimal()
+t_stat_event <- function(data, event_date, sd_benchmark) {
+  # 1. Subset the AR_risk for the specific date using [row, col]
+  # We use drop = TRUE to ensure it returns a single number, not a data frame
+  ar_value <- data[data$Date == event_date, "AR_risk", drop = TRUE]
+
+  # 2. Calculate the t-statistic
+  t_stat <- ar_value / sd_benchmark
+
+  return(t_stat)
 }

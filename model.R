@@ -2,6 +2,7 @@
 event <- ymd("2023-11-20")
 
 # Filtering data based on needed dates
+## Has both estimation and observation dataset
 saudi_cds_10y <- saudi_cds_10y %>%
   filter(
     Date >= ymd('2022-11-20') &
@@ -109,19 +110,28 @@ obs_data_5 <- saudi_cds_10y %>%
   )
 
 obs_data_5 <- calculate_ar(obs_data_5, m_robust)
-
-## Massive Trend Check: [-10, 10]
-obs_data_10 <- saudi_cds_10y %>%
-  filter(
-    Date >= event - days(15) &
-      Date <= event + days(15)
-  )
-
-obs_data_10 <- calculate_ar(obs_data_10, m_robust)
-
+# obs_data_5 %>% select(Date, AR_risk)
 
 # Graph the results
 ggplot(obs_data_5, aes(x = Date, y = AR_risk)) +
   geom_line() +
+  annotate(
+    "rect",
+    xmin = event - days(1),
+    xmax = event + days(1),
+    ymin = -Inf,
+    ymax = Inf,
+    alpha = 0.2,
+    fill = "orange"
+  ) +
+  annotate(
+    "rect",
+    xmin = event - days(3),
+    xmax = event + days(3),
+    ymin = -Inf,
+    ymax = Inf,
+    alpha = 0.2,
+    fill = "purple"
+  ) +
   geom_vline(aes(xintercept = event), linetype = 'dashed') +
   geom_hline(aes(yintercept = 0))
