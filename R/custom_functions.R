@@ -3,19 +3,18 @@
 ## Calculates delta of a column, can have price as levels
 ## Note: Column names must be passed as strings in quotes
 
-
 calc_price_delta <- function(data, date_col, price_col, output_col) {
   # 1. Sort the data frame by the date column
   # We use data[[date_col]] to extract the column as a vector
   data <- data[order(data[[date_col]]), ]
-  
+
   # 2. Calculate the difference (Current - Previous)
   # diff() calculates the change; we pad with NA to maintain row length
   delta_values <- c(NA, diff(data[[price_col]]))
-  
+
   # 3. Assign the result to a new column
   data[[output_col]] <- delta_values
-  
+
   return(data)
 }
 
@@ -24,14 +23,47 @@ calc_price_delta <- function(data, date_col, price_col, output_col) {
 calc_log_delta <- function(data, date_col, price_col, output_col) {
   # 1. Ensure data is sorted by date
   data <- data[order(data[[date_col]]), ]
-  
+
   # 2. Calculate log differences
   # diff() returns a vector of length n-1; prepend NA to keep dimensions consistent
   log_diffs <- c(NA, diff(log(data[[price_col]])))
-  
+
   # 3. Assign to output column
   data[[output_col]] <- log_diffs
-  
+
   return(data)
 }
 
+# Calculates Abnormal Return for the observation time windows
+## Assumes column names Date and d_cds
+calculate_ar <- function(data, model) {
+  data %>%
+    mutate(
+      # '.' is the data passed to the function
+      risk_predict = predict(model, newdata = .),
+      AR_risk = d_cds - risk_predict
+    )
+}
+
+# Plots the abnormal returns
+plot_ar_results <- function(data, event_date, title = "Abnormal Risk Returns") {
+  data %>%
+    ggplot(aes(x = Date, y = AR_risk)) +
+    geom_line(color = "steelblue", linewidth = 0.8) +
+    # Vertical line for the event date
+    geom_vline(
+      xintercept = as.numeric(event_date),
+      linetype = 'dashed',
+      color = "red",
+      linewidth = 1
+    ) +
+    # Horizontal line at zero
+    geom_hline(yintercept = 0, linetype = "solid", color = "black") +
+    labs(
+      title = title,
+      subtitle = paste("Event Date:", event_date),
+      x = "Date",
+      y = "Abnormal Return (AR)"
+    ) +
+    theme_minimal()
+}
