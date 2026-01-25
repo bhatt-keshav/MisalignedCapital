@@ -1,5 +1,6 @@
 # Day when swap agreement with China was announced
 event <- ymd("2023-11-20")
+event_real <- ymd("2023-11-15")
 
 # Filtering data based on needed dates
 ## Has both estimation and observation dataset
@@ -24,7 +25,7 @@ cds_est_data <- saudi_cds_10y %>%
   )
 
 
-# Visualisation shows, that the ΔCDS is practically flat
+# Visualization shows, that the ΔCDS is practically flat
 plot(cds_est_data$d_cds)
 
 ## Which can also be seen by regular harmonic motion, no real trend
@@ -47,38 +48,8 @@ coeftest(m, vcov = vcovHC(m, type = "HC1"))
 m_robust <- rlm(d_cds ~ d_10y + d_lvix + d_lbrent, data = cds_est_data)
 summary(m_robust)
 
-
-# 1. Basic Scatter Plot
-plot(
-  cds_est_data$d_lbrent,
-  cds_est_data$d_cds,
-  pch = 16,
-  col = "gray",
-  main = "Brent Returns vs. CDS Spread Change",
-  xlab = "Brent Log Returns (d_lbrent)",
-  ylab = "CDS Change (d_cds)"
-)
-
-# 2. Add the OLS Regression Line (Blue)
-# We use coefficients 1 (Intercept) and 4 (d_lbrent) from your model
-abline(a = coef(m)[1], b = coef(m)["d_lbrent"], col = "blue", lwd = 2)
-
-# 3. Add the Robust Regression Line (Red)
-abline(
-  a = coef(m_robust)[1],
-  b = coef(m_robust)["d_lbrent"],
-  col = "red",
-  lwd = 2
-)
-
-# 4. Add a Legend to distinguish the two
-legend(
-  "topright",
-  legend = c("OLS Line", "Robust (RLM) Line"),
-  col = c("blue", "red"),
-  lwd = 2
-)
-
+# OLS Plot vs Robust Linear Regression
+plot_model_comparison(cds_est_data, m, m_robust)
 
 #And observation data
 ## Core: [-1,1], we have to do -3 days because the announcement was on a Monday
@@ -88,29 +59,32 @@ obs_data_1 <- saudi_cds_10y %>%
       Date <= event + days(1)
   )
 
-## Abnormal Returns
-obs_data_1 <- calculate_ar(obs_data_1, m_robust)
+## Abnormal Returns plus minus 1 day
+ar_1d_window <- calculate_ar_window(
+  data = saudi_cds_10y,
+  model = m_robust,
+  start_date = event_real - days(1),
+  end_date = event_real + days(1)
+)
 
 
 ## Leak: [-3, 3]
-obs_data_3 <- saudi_cds_10y %>%
-  filter(
-    Date >= event - days(5) &
-      Date <= event + days(3)
-  )
-
-obs_data_3 <- calculate_ar(obs_data_3, m_robust)
+ar_3d_window <- calculate_ar_window(
+  data = saudi_cds_10y,
+  model = m_robust,
+  start_date = event_real - days(5),
+  end_date = event_real + days(5)
+)
 
 
 ## Sanity Check: [-5, 5]
-obs_data_5 <- saudi_cds_10y %>%
-  filter(
-    Date >= event - days(8) &
-      Date <= event + days(7)
-  )
+ar_5d_window <- calculate_ar_window(
+  data = saudi_cds_10y,
+  model = m_robust,
+  start_date = event_real - days(7),
+  end_date = event_real + days(7)
+)
 
-obs_data_5 <- calculate_ar(obs_data_5, m_robust)
-# obs_data_5 %>% select(Date, AR_risk)
 
 # Graph the results
 ggplot(obs_data_5, aes(x = Date, y = AR_risk)) +

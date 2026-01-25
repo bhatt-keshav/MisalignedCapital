@@ -34,12 +34,54 @@ calc_log_delta <- function(data, date_col, price_col, output_col) {
   return(data)
 }
 
-# Calculates Abnormal Return for the observation time windows
+plot_model_comparison <- function(data, ols_model, robust_model) {
+  # 1. Basic Scatter Plot
+  # We use the column names directly to keep it consistent with your models
+  plot(
+    data$d_lbrent,
+    data$d_cds,
+    pch = 16,
+    col = "gray",
+    main = "Brent Returns vs. CDS Spread Change",
+    xlab = "Brent Log Returns (d_lbrent)",
+    ylab = "CDS Change (d_cds)"
+  )
+
+  # 2. Add the OLS Regression Line (Blue)
+  # Using indexing to ensure we grab the correct coefficients
+  abline(
+    a = coef(ols_model)[1],
+    b = coef(ols_model)["d_lbrent"],
+    col = "blue",
+    lwd = 2
+  )
+
+  # 3. Add the Robust Regression Line (Red)
+  abline(
+    a = coef(robust_model)[1],
+    b = coef(robust_model)["d_lbrent"],
+    col = "red",
+    lwd = 2
+  )
+
+  # 4. Add a Legend
+  legend(
+    "topright",
+    legend = c("OLS Line", "Robust (RLM) Line"),
+    col = c("blue", "red"),
+    lwd = 2,
+    bg = "white" # Added background to make it readable over the dots
+  )
+}
+
+# Calculates Abnormal Return for the chosen observation time window
 ## Assumes column names Date and d_cds
-calculate_ar <- function(data, model) {
+calculate_ar_window <- function(data, model, start_date, end_date) {
   data %>%
+    # 1. Filter the data for the specific window
+    filter(Date >= start_date & Date <= end_date) %>%
+    # 2. Calculate predictions and AR
     mutate(
-      # '.' is the data passed to the function
       risk_predict = predict(model, newdata = .),
       AR_risk = d_cds - risk_predict
     )
@@ -51,7 +93,7 @@ t_stat_event <- function(data, event_date, sd_benchmark) {
   ar_value <- data[data$Date == event_date, "AR_risk", drop = TRUE]
 
   # 2. Calculate the t-statistic
-  t_stat <- ar_value / sd_benchmark
+  t_stat <- ar_value / degrees_freedom
 
   return(t_stat)
 }
