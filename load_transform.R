@@ -14,28 +14,34 @@ conflict_prefer("lag", "dplyr")
 
 source("R/custom_functions.R")
 
-saudi_cds_10y <- calc_cds_delta(saudi_cds_10y, "Date", "Price")
-
 
 # Read Raw Data
 saudi_cds_10y_raw <- read.csv("./data/SAGV10YUSAC.csv")
+saudi_cds_10y_raw$Date <- dmy(saudi_cds_10y_raw$Date)
+saudi_cds_10y_raw <- saudi_cds_10y_raw[, c("Date", "Price")]
+
 
 us_10y_raw <- read.csv(
   "./data/United-States-10-YearBondYieldHistoricalData.csv",
   header = TRUE
 )
+us_10y_raw$Date <- mdy(us_10y_raw$Date)
+us_10y_raw <- us_10y_raw[, c("Date", "Price")]
 
 brent <- readxl::read_xls("./data/eia_brent_spot.xls")
+brent$Date <- ymd(brent$Date)
+brent <- brent[, c("Date", "Brent_Spot")]
+
 vix <- read.csv("./data/cboe_vix.csv")
+vix$Date <- mdy(vix$Date)
+vix <- vix[, c("Date", "Price")]
 
 
 # Process data
 ## CDS
-saudi_cds_10y <- saudi_cds_10y_raw[, c("Date", "Price")]
-saudi_cds_10y$Date <- dmy(saudi_cds_10y$Date)
 
 saudi_cds_10y <- calc_price_delta(
-  data = saudi_cds_10y,
+  data = saudi_cds_10y_raw,
   date_col = "Date",
   price_col = "Price",
   output_col = "d_cds"
@@ -43,7 +49,6 @@ saudi_cds_10y <- calc_price_delta(
 
 
 ## US 10 year yields
-us_10y_raw$Date <- mdy(us_10y_raw$Date)
 us_10y <- us_10y_raw[, c("Date", "Price")]
 
 us_10y <- calc_price_delta(
@@ -60,7 +65,6 @@ brent <- brent %>% select(Date, d_lbrent)
 
 ## VIX
 vix <- vix[, c("Date", "Price")]
-vix$Date <- mdy(vix$Date)
 
 vix <- calc_log_delta(vix, "Date", "Price", "d_lvix")
 vix <- vix %>% select(Date, d_lvix)
