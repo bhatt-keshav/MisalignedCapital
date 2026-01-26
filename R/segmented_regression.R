@@ -40,8 +40,65 @@ m_segmented <- lm(
 
 summary(m_segmented)
 
-# dw_results <- dwtest(m_segmented)
-# print(dw_results)
+# Residuals show a "snake" pattern = not white noise :(
+plot(
+  residuals(m_segmented),
+  type = "l",
+  main = "Residuals showing Autocorrelation",
+  ylab = "Error",
+  xlab = "Time Index"
+)
+abline(h = 0, col = "red")
 
+# Performing the NW test
 robust_results <- coeftest(m_segmented, vcov = NeweyWest(m_segmented))
 print(robust_results)
+
+
+# Plotting the regression line
+# 1. Adding predictions from the model
+saudi_segmented_reg$y_hat <- predict(m_segmented)
+
+# 2. Creating the plot
+ggplot(saudi_segmented_reg, aes(x = Date, y = cds)) +
+  # Actual data points (faded to keep focus on the trend)
+  geom_point(alpha = 0.3, color = "gray40") +
+
+  # The Segmented Lines
+  geom_line(aes(y = y_hat), color = "darkred", linewidth = 1.2) +
+
+  # Vertical line at the event (Nov 15, 2023)
+  geom_vline(
+    xintercept = event_real,
+    linetype = "dashed",
+    color = "black"
+  ) +
+
+  # Annotate the Jump
+  annotate(
+    "text",
+    x = as.Date(event_real),
+    y = 110,
+    label = "Event: -19.74 bps Jump",
+    color = "darkred",
+    hjust = -0.1,
+    fontface = "bold"
+  ) +
+
+  labs(
+    title = "Structural Break in Saudi 10Y CDS",
+    subtitle = "Segmented Regression: Level Shift vs. Trend Change",
+    x = "Date",
+    y = "CDS Level (bps)"
+  ) +
+  theme_minimal()
+
+# Controlling for other variables (yield + vix + Brent_Spot) ***
+m_controlled <- lm(
+  cds ~ time_center + post_event + interaction_term + yield + vix + Brent_Spot,
+  data = saudi_segmented_reg
+)
+summary(m_controlled)
+
+# Then apply Newey-West again
+coeftest(m_controlled, vcov = NeweyWest(m_controlled))

@@ -1,10 +1,11 @@
 library(MASS)
 library(lmtest)
+library(ggplot2)
 library(sandwich)
-library(tidyverse)
 library(lubridate)
-library(conflicted)
+library(tidyverse)
 library(patchwork)
+library(conflicted)
 
 
 # Force R to use dplyr's version of these common conflicting functions
