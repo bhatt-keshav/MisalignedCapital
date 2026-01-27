@@ -60,7 +60,8 @@ for (i in seq_along(aus_ar_5d_window$Date)) {
     aus_ar_5d_window,
     event_date = aus_ar_5d_window$Date[i],
     sd_ar_all_aus
-  )
+  ) %>%
+    print()
 }
 
 aus_ar_5d_window[c("Date", "AR_risk")]
