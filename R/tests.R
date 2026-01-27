@@ -11,6 +11,63 @@ t_event_real
 ## Biggest positive spike
 t_event_nov17 <- t_stat_event(
   obs_data_5,
+  event_date = event_aus,
+  sd_ar_all
+)
+t_event_nov17
+
+## Biggest negative spike
+t_event_nov15 <- t_stat_event(
+  obs_data_5,
+  event_date = event - days(5),
+  sd_ar_all
+)
+t_event_nov15
+
+t_event_nov21 <- t_stat_event(
+  obs_data_5,
+  event_date = event + days(1),
+  sd_ar_all
+)
+t_event_nov21
+
+# Test cumulative daily returns
+cumulative_ar_3d <- sum(ar_3d_window$AR_risk)
+cumulative_ar_3d / (sqrt(dim(ar_3d_window)[1]) * sd_ar_all)
+
+cumulative_ar_5d <- sum(ar_5d_window$AR_risk)
+cumulative_ar_5d / (sqrt(dim(ar_5d_window)[1]) * sd_ar_all)
+
+################################# AUSTRALIA #######################
+# Performing significance tests on AR
+ar_all_aus <- calculate_ar(aus_cds_10y, m_robust_aus)
+sd_ar_all_aus <- ar_all_aus$AR_risk %>% na.omit() %>% sd()
+
+# Compute the t-statistic for the days of interest
+# t_event <- t_stat_event(obs_data_5, event_date = event, sd_ar_all)
+
+t_event_aus <- t_stat_event(
+  aus_ar_5d_window,
+  event_date = event_aus,
+  sd_ar_all_aus
+)
+t_event_aus
+
+
+for (i in seq_along(aus_ar_5d_window$Date)) {
+  print(aus_ar_5d_window$Date[i])
+  t_stat_event(
+    aus_ar_5d_window,
+    event_date = aus_ar_5d_window$Date[i],
+    sd_ar_all_aus
+  )
+}
+
+aus_ar_5d_window[c("Date", "AR_risk")]
+
+## Biggest positive spike
+t_event_nov17 <- t_stat_event(
+  obs_data_5,
   event_date = event - days(3),
   sd_ar_all
 )
@@ -37,3 +94,5 @@ cumulative_ar_3d / (sqrt(dim(ar_3d_window)[1]) * sd_ar_all)
 
 cumulative_ar_5d <- sum(ar_5d_window$AR_risk)
 cumulative_ar_5d / (sqrt(dim(ar_5d_window)[1]) * sd_ar_all)
+
+############ AU

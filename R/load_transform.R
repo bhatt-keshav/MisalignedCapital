@@ -13,7 +13,7 @@ conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 conflict_prefer("lag", "dplyr")
 
-source("R/custom_functions.R")
+source("./R/custom_functions.R")
 
 
 # Read Raw Data
@@ -23,7 +23,7 @@ saudi_cds_10y_raw <- saudi_cds_10y_raw[, c("Date", "Price")]
 
 aus_cds_10y_raw <- read.csv("./data/AUGV10YUSAR.csv")
 aus_cds_10y_raw$Date <- mdy(aus_cds_10y_raw$Date)
-aus_cds_10y_raw <- aus_cds_10y_raw %>% select(Date, Price)
+aus_cds_10y <- aus_cds_10y_raw %>% select(Date, Price)
 
 
 us_10y_raw <- read.csv(
@@ -43,6 +43,7 @@ vix$Date <- mdy(vix$Date)
 
 
 iron_ore <- read.csv("./data/iron_ore.csv")
+iron_ore$Date <- mdy(iron_ore$Date)
 
 # Process data
 ## CDS
@@ -54,12 +55,18 @@ saudi_cds_10y <- calc_price_delta(
   output_col = "d_cds"
 )
 
+aus_cds_10y <- calc_price_delta(
+  data = aus_cds_10y_raw,
+  date_col = "Date",
+  price_col = "Price",
+  output_col = "d_cds"
+)
+
+aus_cds_10y <- aus_cds_10y %>% select(Date, d_cds)
 
 ## US 10 year yields
-us_10y <- us_10y_raw[, c("Date", "Price")]
-
 us_10y <- calc_price_delta(
-  data = us_10y,
+  data = us_10y_raw,
   date_col = "Date",
   price_col = "Price",
   output_col = "d_10y"
@@ -75,3 +82,7 @@ vix <- vix[, c("Date", "Price")]
 
 vix <- calc_log_delta(vix, "Date", "Price", "d_lvix")
 vix <- vix %>% select(Date, d_lvix)
+
+## Iron ore
+iron_ore <- calc_log_delta(iron_ore, "Date", "Price", "d_iron")
+iron_ore <- iron_ore %>% select(Date, d_iron)

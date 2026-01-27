@@ -74,6 +74,14 @@ plot_model_comparison <- function(data, ols_model, robust_model) {
   )
 }
 
+calculate_ar <- function(data, model) {
+  data %>%
+    mutate(
+      risk_predict = predict(model, newdata = .), # '.' is the data passed to the function
+      AR_risk = d_cds - risk_predict
+    )
+}
+
 # Calculates Abnormal Return for the chosen observation time window
 ## Assumes column names Date and d_cds
 calculate_ar_window <- function(data, model, start_date, end_date) {
@@ -93,7 +101,7 @@ t_stat_event <- function(data, event_date, sd_benchmark) {
   ar_value <- data[data$Date == event_date, "AR_risk", drop = TRUE]
 
   # 2. Calculate the t-statistic
-  t_stat <- ar_value / degrees_freedom
+  t_stat <- ar_value / sd_benchmark
 
   return(t_stat)
 }
