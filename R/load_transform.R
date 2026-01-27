@@ -21,6 +21,10 @@ saudi_cds_10y_raw <- read.csv("./data/SAGV10YUSAC.csv")
 saudi_cds_10y_raw$Date <- dmy(saudi_cds_10y_raw$Date)
 saudi_cds_10y_raw <- saudi_cds_10y_raw[, c("Date", "Price")]
 
+aus_cds_10y_raw <- read.csv("./data/AUGV10YUSAR.csv")
+aus_cds_10y_raw$Date <- mdy(aus_cds_10y_raw$Date)
+aus_cds_10y_raw <- aus_cds_10y_raw %>% select(Date, Price)
+
 
 us_10y_raw <- read.csv(
   "./data/United-States-10-YearBondYieldHistoricalData.csv",
@@ -34,9 +38,11 @@ brent$Date <- ymd(brent$Date)
 brent <- brent[, c("Date", "Brent_Spot")]
 
 vix <- read.csv("./data/cboe_vix.csv")
-vix$Date <- mdy(vix$Date)
 vix <- vix[, c("Date", "Price")]
+vix$Date <- mdy(vix$Date)
 
+
+iron_ore <- read.csv("./data/iron_ore.csv")
 
 # Process data
 ## CDS
