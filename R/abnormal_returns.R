@@ -1,8 +1,10 @@
-# Day when swap agreement between China and Australia was announced
+# Set dates
+## Day when swap agreement between China and Saudi was announced in the press
 event <- ymd("2023-11-20")
+## This is the event of real significance (comes later from tests.R)
 event_real <- ymd("2023-11-15")
 
-# Filtering data based on needed dates
+# Filtering data based on needed dates one year ago from the event and plus 7 days
 ## Has both estimation and observation dataset
 saudi_cds_10y <- saudi_cds_10y %>%
   filter(
@@ -11,7 +13,7 @@ saudi_cds_10y <- saudi_cds_10y %>%
   ) %>%
   dplyr::select(Date, d_cds)
 
-## Join all data
+## Join all x variables needed for estimating CDS by a linear model
 saudi_cds_10y <- saudi_cds_10y %>%
   left_join(us_10y, by = "Date") %>%
   left_join(vix, by = "Date") %>%
@@ -19,14 +21,13 @@ saudi_cds_10y <- saudi_cds_10y %>%
 
 
 # Create estimation data set (-1 year, 30 days)
-cds_est_data <- saudi_cds_10y %>%
+saudi_cds_est_data <- saudi_cds_10y %>%
   filter(
-    Date <= (event - 30)
+    Date <= (event - days(30))
   )
 
-
-# Visualization shows, that the ΔCDS is practically flat
-plot(cds_est_data$d_cds)
+# Visualization shows, that at its baseline ΔCDS is practically flat with some jumps
+plot(saudi_cds_est_data$d_cds)
 
 ## Which can also be seen by regular harmonic motion, no real trend
 plot(saudi_cds_10y_raw$Date, saudi_cds_10y_raw$Price)
@@ -34,22 +35,24 @@ plot(saudi_cds_10y_raw$Date, saudi_cds_10y_raw$Price)
 # Do linear regression
 m <- lm(
   d_cds ~ d_10y + d_lvix + d_lbrent,
-  data = cds_est_data
+  data = saudi_cds_est_data
 )
 
 summary(m)
 plot(m)
 
-## Checking the coefficients for
-bptest(m)
-coeftest(m, vcov = vcovHC(m, type = "HC1"))
+## Test for heteroskedasticity
+bptest(m) #none present
+
+# Regression results with adjusted standard errors
+coeftest(m, vcov = vcovHC(m, type = "HC1")) #confirmed
 
 # Do robust linear regression (RLM)
-m_robust <- rlm(d_cds ~ d_10y + d_lvix + d_lbrent, data = cds_est_data)
+m_robust <- rlm(d_cds ~ d_10y + d_lvix + d_lbrent, data = saudi_cds_est_data)
 summary(m_robust)
 
 # OLS Plot vs Robust Linear Regression
-plot_model_comparison(cds_est_data, m, m_robust)
+plot_model_comparison(saudi_cds_est_data, m, m_robust)
 
 #And observation data
 ## Core: [-1,1], we have to do -3 days because the announcement was on a Monday
