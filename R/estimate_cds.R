@@ -105,28 +105,3 @@ aus_ar_5d_window <- calculate_ar_window(
   start_date = event_aus - days(7),
   end_date = event_aus + days(7)
 )
-
-
-# Graph the results
-ggplot(aus_obs_data_5, aes(x = Date, y = AR_risk)) +
-  geom_line() +
-  annotate(
-    "rect",
-    xmin = event - days(1),
-    xmax = event + days(1),
-    ymin = -Inf,
-    ymax = Inf,
-    alpha = 0.2,
-    fill = "orange"
-  ) +
-  annotate(
-    "rect",
-    xmin = event - days(3),
-    xmax = event + days(3),
-    ymin = -Inf,
-    ymax = Inf,
-    alpha = 0.2,
-    fill = "purple"
-  ) +
-  geom_vline(aes(xintercept = event), linetype = 'dashed') +
-  geom_hline(aes(yintercept = 0))

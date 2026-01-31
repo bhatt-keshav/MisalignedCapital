@@ -49,7 +49,9 @@ ggplot(ar_5d_window, aes(x = Date, y = AR_risk)) +
     alpha = 0.2,
     fill = "purple"
   ) +
+  #   This is the statistically significant event
   geom_vline(aes(xintercept = event_real), linetype = 'dashed') +
+  #   This is announced
   geom_vline(aes(xintercept = event), linetype = 1) +
   geom_hline(aes(yintercept = 0))
 
@@ -63,3 +65,28 @@ sd_ar_all_aus <- ar_all_aus$AR_risk %>% na.omit() %>% sd()
 ## None of the dates have a significant t-stat
 aus_ar_5d_window <- aus_ar_5d_window %>%
   mutate(t_stat = calc_t_stat(AR_risk, sd_benchmark = sd_ar_all_aus))
+
+# Graph the results
+## Shows: Smooth movement, No isolated spike, No significant AR and No level or trend shift
+ggplot(aus_ar_5d_window, aes(x = Date, y = AR_risk)) +
+  geom_line() +
+  annotate(
+    "rect",
+    xmin = event_aus - days(1),
+    xmax = event_aus + days(1),
+    ymin = -Inf,
+    ymax = Inf,
+    alpha = 0.2,
+    fill = "orange"
+  ) +
+  annotate(
+    "rect",
+    xmin = event_aus - days(3),
+    xmax = event_aus + days(3),
+    ymin = -Inf,
+    ymax = Inf,
+    alpha = 0.2,
+    fill = "purple"
+  ) +
+  geom_vline(aes(xintercept = event_aus), linetype = 'dashed') +
+  geom_hline(aes(yintercept = 0))
