@@ -37,9 +37,9 @@ brent <- readxl::read_xls("./data/eia_brent_spot.xls")
 brent$Date <- ymd(brent$Date)
 brent <- brent[, c("Date", "Brent_Spot")]
 
-vix <- read.csv("./data/cboe_vix.csv")
-vix <- vix[, c("Date", "Price")]
-vix$Date <- mdy(vix$Date)
+vix_raw <- read.csv("./data/cboe_vix.csv")
+vix_raw <- vix_raw[, c("Date", "Price")]
+vix_raw$Date <- mdy(vix_raw$Date)
 
 
 iron_ore <- read.csv("./data/iron_ore.csv")
@@ -78,9 +78,8 @@ brent <- calc_log_delta(brent, "Date", "Brent_Spot", "d_lbrent")
 brent <- brent %>% select(Date, d_lbrent)
 
 ## VIX
-vix <- vix[, c("Date", "Price")]
 
-vix <- calc_log_delta(vix, "Date", "Price", "d_lvix")
+vix <- calc_log_delta(vix_raw, "Date", "Price", "d_lvix")
 vix <- vix %>% select(Date, d_lvix)
 
 ## Iron ore
