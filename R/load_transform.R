@@ -33,9 +33,9 @@ us_10y_raw <- read.csv(
 us_10y_raw$Date <- mdy(us_10y_raw$Date)
 us_10y_raw <- us_10y_raw[, c("Date", "Price")]
 
-brent <- readxl::read_xls("./data/eia_brent_spot.xls")
-brent$Date <- ymd(brent$Date)
-brent <- brent[, c("Date", "Brent_Spot")]
+brent_raw <- readxl::read_xls("./data/eia_brent_spot.xls")
+brent_raw$Date <- ymd(brent_raw$Date)
+brent_raw <- brent_raw[, c("Date", "Brent_Spot")]
 
 vix_raw <- read.csv("./data/cboe_vix.csv")
 vix_raw <- vix_raw[, c("Date", "Price")]
@@ -74,7 +74,7 @@ us_10y <- calc_price_delta(
 us_10y <- us_10y %>% select(Date, d_10y)
 
 ## Deltas for Brent price
-brent <- calc_log_delta(brent, "Date", "Brent_Spot", "d_lbrent")
+brent <- calc_log_delta(brent_raw, "Date", "Brent_Spot", "d_lbrent")
 brent <- brent %>% select(Date, d_lbrent)
 
 ## VIX

@@ -105,3 +105,7 @@ t_stat_event <- function(data, event_date, sd_benchmark) {
 
   return(t_stat)
 }
+
+calc_t_stat <- function(ar_vector, sd_benchmark) {
+  return(abs(ar_vector / sd_benchmark))
+}
