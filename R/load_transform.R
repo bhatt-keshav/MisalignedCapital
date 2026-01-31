@@ -45,7 +45,7 @@ vix$Date <- mdy(vix$Date)
 iron_ore <- read.csv("./data/iron_ore.csv")
 iron_ore$Date <- mdy(iron_ore$Date)
 
-# Process data
+# Calculate deltas with price data
 ## CDS
 
 saudi_cds_10y <- calc_price_delta(
@@ -64,7 +64,7 @@ aus_cds_10y <- calc_price_delta(
 
 aus_cds_10y <- aus_cds_10y %>% select(Date, d_cds)
 
-## US 10 year yields
+## Deltas for US 10 year yields
 us_10y <- calc_price_delta(
   data = us_10y_raw,
   date_col = "Date",
@@ -73,7 +73,7 @@ us_10y <- calc_price_delta(
 )
 us_10y <- us_10y %>% select(Date, d_10y)
 
-## Brent
+## Deltas for Brent price
 brent <- calc_log_delta(brent, "Date", "Brent_Spot", "d_lbrent")
 brent <- brent %>% select(Date, d_lbrent)
 
