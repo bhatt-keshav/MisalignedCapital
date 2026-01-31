@@ -60,16 +60,6 @@ ar_all_aus <- calculate_ar(aus_cds_10y, m_robust_aus)
 sd_ar_all_aus <- ar_all_aus$AR_risk %>% na.omit() %>% sd()
 
 # Compute the t-statistic for 5 days around announcement date
-
-for (i in seq_along(aus_ar_5d_window$Date)) {
-  print(aus_ar_5d_window$Date[i])
-  t_stat_event(
-    aus_ar_5d_window,
-    event_date = aus_ar_5d_window$Date[i],
-    sd_ar_all_aus
-  ) %>%
-    abs %>%
-    print()
-}
-
-event_real_aus <- ymd("2012-03-23")
+## None of the dates have a significant t-stat
+aus_ar_5d_window <- aus_ar_5d_window %>%
+  mutate(t_stat = calc_t_stat(AR_risk, sd_benchmark = sd_ar_all_aus))
