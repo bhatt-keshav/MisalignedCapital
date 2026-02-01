@@ -1,19 +1,19 @@
 ########## SAUDI ARABIA ###########
 # Performing significance tests on AR
-ar_all <- calculate_ar(saudi_cds_10y, m)
-sd_ar_all <- ar_all$AR_risk %>% na.omit() %>% sd()
+ar_est <- calculate_ar(saudi_cds_est_data, m)
+sd_ar_est <- ar_est$AR_risk %>% na.omit() %>% sd()
 
 # Sanity Check window: [-5, 5]
 ar_5d_window <- calculate_ar_window(
   data = saudi_cds_10y,
   model = m,
-  start_date = event_real - days(7),
-  end_date = event_real + days(7)
+  start_date = event - days(7),
+  end_date = event + days(7)
 )
 
 # Calculating t-stat for Abnormal Returns in this ±5 day window
 ar_5d_window <- ar_5d_window %>%
-  mutate(t_stat = calc_t_stat(AR_risk, sd_benchmark = sd_ar_all))
+  mutate(t_stat = calc_t_stat(AR_risk, sd_benchmark = sd_ar_est))
 
 # It shows maximum t-stat is at 15 November = real event actually!
 ## This is the event of real significance
@@ -22,10 +22,12 @@ event_real <- ymd("2023-11-15")
 
 # T-Test cumulative daily returns
 cumulative_ar_3d <- sum(ar_3d_window$AR_risk)
-cumulative_ar_3d / (sqrt(dim(ar_3d_window)[1]) * sd_ar_all)
+cumulative_ar_3d
+cumulative_ar_3d / (sqrt(dim(ar_3d_window)[1]) * sd_ar_est)
 
 cumulative_ar_5d <- sum(ar_5d_window$AR_risk)
-cumulative_ar_5d / (sqrt(dim(ar_5d_window)[1]) * sd_ar_all) #significant!
+cumulative_ar_5d
+cumulative_ar_5d / (sqrt(dim(ar_5d_window)[1]) * sd_ar_est)
 
 
 # Graph the of AR around the real event
