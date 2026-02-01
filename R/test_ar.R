@@ -60,7 +60,7 @@ ggplot(ar_5d_window, aes(x = Date, y = AR_risk)) +
 
 ################################# AUSTRALIA #######################
 # Performing significance tests on AR
-ar_all_aus <- calculate_ar(aus_cds_10y, m_robust_aus)
+ar_all_aus <- calculate_ar(cds_est_data_aus, m_robust_aus)
 sd_ar_all_aus <- ar_all_aus$AR_risk %>% na.omit() %>% sd()
 
 # Compute the t-statistic for 5 days around announcement date
