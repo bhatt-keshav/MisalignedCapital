@@ -68,6 +68,8 @@ sd_ar_all_aus <- ar_all_aus$AR_risk %>% na.omit() %>% sd()
 aus_ar_5d_window <- aus_ar_5d_window %>%
   mutate(t_stat = calc_t_stat(AR_risk, sd_benchmark = sd_ar_all_aus))
 
+aus_ar_5d_window %>% select(Date, AR_risk, t_stat)
+
 # Graph the results
 ## Shows: Smooth movement, No isolated spike, No significant AR and No level or trend shift
 ggplot(aus_ar_5d_window, aes(x = Date, y = AR_risk)) +
